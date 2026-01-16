@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: gap: content: ws: wss: https:;">
+    <title>Health Monitor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .app-bar {
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .app-bar h1 { font-size: 20px; font-weight: 700; }
+        .status { 
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .connected { background: rgba(76, 175, 80, 0.3); border: 2px solid #4caf50; }
+        .disconnected { background: rgba(244, 67, 54, 0.3); border: 2px solid #f44336; }
+        .container { padding: 16px; }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card h2 { 
+            font-size: 16px; 
+            margin-bottom: 16px; 
+            color: #333;
+            font-weight: 600;
+        }
+        
+        /* Data Cards */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .data-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+        .data-card.spo2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .data-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .data-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        .data-value {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .data-unit {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        .data-status {
+            font-size: 11px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        /* Control Section */
+        .control-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .btn-on {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-off {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            color: white;
+        }
+        .btn-on:active, .btn-off:active { opacity: 0.8; }
+        
+        /* Form Elements */
+        .form-group { margin-bottom: 12px; }
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 14px; 
+            color: #666;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn-disconnect { 
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%); 
+        }
+        
+        /* Messages */
+        .messages {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+        }
+        .message {
+            padding: 8px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            font-size: 12px;
+        }
+        .hidden { display: none; }
+        
+        /* Status Info */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-bar">
+        <h1>🏥 Health Monitor</h1>
+        <span class="status disconnected" id="status">
+            <span class="status-dot"></span>
+            Disconnected
+        </span>
+    </div>
+
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection">
+            <div class="card">
+                <h2>🔐 Connect to HiveMQ Cloud</h2>
+                <div class="form-group">
+                    <label>Broker</label>
+                    <input type="text" id="broker" value="91c95e4b1fc04b6f9eb2e90b69199494.s1.eu.hivemq.cloud">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" value="hivemq.webclient.1763287911311">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" value="af1,HVwDYM0X@s#m;q28">
+                </div>
+                <button class="btn" onclick="connect()">Connect (TLS)</button>
+            </div>
+        </div>
+
+        <div id="mainSection" class="hidden">
+            <div class="card">
+                <h2>📤 Publish</h2>
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="pubTopic" placeholder="home/temp">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="pubMessage" rows="3"></textarea>
+                </div>
+                <button class="btn" onclick="publish()">Publish</button>
+            </div>
+
+            <div class="card">
+                <h2>📥 Subscribe</h2>
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="subTopic" placeholder="home/temp">
+                </div>
+                <button class="btn btn-secondary" onclick="subscribe()">Subscribe</button>
+            </div>
+
+            <div class="card">
+                <h2>📨 Messages</h2>
+                <div class="messages" id="messages"></div>
+                <button class="btn" onclick="clearMessages()">Clear</button>
+            </div>
+
+            <div class="card">
+                <button class="btn btn-secondary" onclick="disconnect()">Disconnect</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="cordova.js"></script>
+    <!-- Load MQTT from CDN (more reliable) -->
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js" 
+            onerror="loadLocalMQTT()">
+    </script>
+    <script>
+        // Fallback to local if CDN fails
+        function loadLocalMQTT() {
+            var script = document.createElement('script');
+            script.src = 'js/mqtt.min.js';
+            script.onerror = function() {
+                document.body.innerHTML = '<div style="padding:20px; color:red; font-size:16px;">ERROR: MQTT library failed to load!<br><br>Check:<br>1. Internet connection<br>2. File js/mqtt.min.js exists</div>';
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>

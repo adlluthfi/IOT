@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: gap: content: ws: wss: https:;">
+    <title>Health Monitor</title>
+    <link rel="stylesheet" href="css/health.css">
+</head>
+<body>
+    <div class="app-bar">
+        <h1>🏥 Health Monitor</h1>
+        <span class="status disconnected" id="status">
+            <span class="status-dot"></span>
+            Disconnected
+        </span>
+    </div>
+
+    <div class="container">
+        <!-- Login Section - Hidden by default -->
+        <div id="loginSection" class="hidden">
+            <div class="card">
+                <h2>🔄 Connecting...</h2>
+                <p style="text-align: center; color: #666;">Please wait...</p>
+            </div>
+        </div>
+
+        <!-- Main Section -->
+        <div id="mainSection" class="hidden">
+            <!-- Health Data Cards -->
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-icon">❤️</div>
+                    <div class="data-label">Heart Rate</div>
+                    <div class="data-value" id="heartRate">0</div>
+                    <div class="data-unit">BPM</div>
+                    <div class="data-status" id="hrStatus">Waiting...</div>
+                </div>
+                <div class="data-card spo2">
+                    <div class="data-icon">🫁</div>
+                    <div class="data-label">SpO2</div>
+                    <div class="data-value" id="spo2">0</div>
+                    <div class="data-unit">%</div>
+                    <div class="data-status" id="spo2Status">Waiting...</div>
+                </div>
+            </div>
+
+            <!-- Sensor Control -->
+            <div class="control-card">
+                <h2>⚡ Sensor Control</h2>
+                <button class="control-btn btn-on" onclick="turnOnSensor()">
+                    🟢 Turn ON Sensor
+                </button>
+                <button class="control-btn btn-off" onclick="turnOffSensor()">
+                    🔴 Turn OFF Sensor
+                </button>
+            </div>
+
+            <!-- Status Info -->
+            <div class="card">
+                <h2>📊 Device Status</h2>
+                <div class="info-row">
+                    <span class="info-label">Device</span>
+                    <span class="info-value" id="deviceStatus">Online</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Update</span>
+                    <span class="info-value" id="lastUpdate">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Sensor State</span>
+                    <span class="info-value" id="sensorState">Unknown</span>
+                </div>
+            </div>
+
+            <!-- Messages Log -->
+            <div class="card">
+                <h2>📝 Activity Log</h2>
+                <div class="messages" id="messages"></div>
+                <button class="btn-clear" onclick="clearMessages()">Clear Log</button>
+            </div>
+
+            <button class="btn btn-disconnect" onclick="disconnect()">Disconnect</button>
+        </div>
+    </div>
+
+    <script src="cordova.js"></script>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <script src="js/health.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "cordova-android": "^14.0.1",
+    "cordova-plugin-mqtt": "^0.3.8"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-mqtt": {}
+    }
+  }
+}

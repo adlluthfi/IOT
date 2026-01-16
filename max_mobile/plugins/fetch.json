@@ -1,0 +1,10 @@
+{
+  "cordova-plugin-mqtt": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-mqtt"
+    },
+    "is_top_level": true,
+    "variables": {}
+  }
+}

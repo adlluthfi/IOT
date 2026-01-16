@@ -1,0 +1,65 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {
+      "AndroidManifest.xml": {
+        "parents": {
+          "/manifest": [
+            {
+              "xml": "<uses-permission android:name=\"android.permission.INTERNET\" />",
+              "count": 4
+            },
+            {
+              "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
+              "count": 4
+            },
+            {
+              "xml": "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\" />",
+              "count": 4
+            }
+          ]
+        }
+      },
+      "res/xml/config.xml": {
+        "parents": {
+          "/*": [
+            {
+              "xml": "<feature name=\"CordovaMqTTPlugin\"><param name=\"android-package\" value=\"com.arcoirislabs.plugin.mqtt.CordovaMqTTPlugin\" /></feature>",
+              "count": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  "installed_plugins": {
+    "cordova-plugin-mqtt": {
+      "PACKAGE_NAME": "com.health.monitor"
+    }
+  },
+  "dependent_plugins": {},
+  "modules": [
+    {
+      "id": "cordova-plugin-mqtt.MQTTEmitter",
+      "file": "plugins/cordova-plugin-mqtt/www/MQTTEmitter.js",
+      "pluginId": "cordova-plugin-mqtt",
+      "clobbers": [
+        "ME"
+      ]
+    },
+    {
+      "id": "cordova-plugin-mqtt.CordovaMqTTPlugin",
+      "file": "plugins/cordova-plugin-mqtt/www/cordova-plugin-mqtt.js",
+      "pluginId": "cordova-plugin-mqtt",
+      "clobbers": [
+        "cordova.plugins.CordovaMqTTPlugin"
+      ]
+    }
+  ],
+  "plugin_metadata": {
+    "cordova-plugin-mqtt": "0.3.8"
+  }
+}

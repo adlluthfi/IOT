@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MQTT Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2>MQTT Connection Test</h2>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <div id="log"></div>
+
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <script>
+        let client;
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.className = 'log';
+            div.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+            document.getElementById('log').appendChild(div);
+        }
+
+        function testConnection() {
+            if (client) {
+                log('Disconnecting old client...');
+                client.end(true);
+            }
+
+            log('Testing connection...');
+            
+            const url = 'wss://91c95e4b1fc04b6f9eb2e90b69199494.s1.eu.hivemq.cloud:8884/mqtt';
+            const clientId = 'test_' + Math.random().toString(16).substr(2, 8);
+            
+            log('URL: ' + url);
+            log('Client ID: ' + clientId);
+            
+            client = mqtt.connect(url, {
+                username: 'hivemq.webclient.1763287911311',
+                password: 'af1,HVwDYM0X@s#m;q28',
+                clientId: clientId,
+                clean: true,
+                reconnectPeriod: 0, // Disable auto-reconnect for testing
+                connectTimeout: 30000,
+                keepalive: 60,
+                protocolVersion: 4
+            });
+
+            client.on('connect', function() {
+                log('✅ CONNECTED!');
+                log('Client is: ' + (client.connected ? 'connected' : 'not connected'));
+            });
+
+            client.on('reconnect', function() {
+                log('🔄 Reconnecting...');
+            });
+
+            client.on('close', function() {
+                log('⚠️ Connection closed');
+            });
+
+            client.on('offline', function() {
+                log('❌ Client offline');
+            });
+
+            client.on('error', function(err) {
+                log('❌ ERROR: ' + err.toString());
+            });
+
+            client.on('message', function(topic, message) {
+                log('📨 Message: ' + message.toString());
+            });
+        }
+
+        function disconnect() {
+            if (client) {
+                client.end();
+                log('Disconnected');
+            }
+        }
+    </script>
+</body>
+</html>
